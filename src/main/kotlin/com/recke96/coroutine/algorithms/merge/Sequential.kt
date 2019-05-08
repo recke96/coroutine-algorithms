@@ -1,5 +1,8 @@
 package com.recke96.coroutine.algorithms.merge
 
+/**
+ * Simple strictly sequential implementation of a generic merge algorithm.
+ */
 fun <T: Comparable<T>> mergeSeq(a: List<T>, b: List<T>): List<T> {
     val merged = ArrayList<T>(a.size + b.size)
     var i = 0; var j = 0
