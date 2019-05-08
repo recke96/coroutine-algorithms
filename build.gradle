@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.31'
+    id "org.jetbrains.kotlin.kapt" version "1.3.31"
+    id 'application'
+}
+
+group 'com.recke96'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile "com.xenomachina:kotlin-argparser:${property('argparser.version')}"
+    compile group: "org.openjdk.jmh", name: "jmh-core", version: property('jmh.version')
+    kapt group: "org.openjdk.jmh", name: "jmh-generator-annprocess", version: property('jmh.version')
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+mainClassName = 'com.recke96.coroutine.algorithms.MainKt'
+run {
+    if(System.getProperty("exec.args") != null) {
+        args System.getProperty("exec.args").split()
+    }
+}
+
+
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
