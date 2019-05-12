@@ -83,7 +83,7 @@ open class BenchMerge {
          * Parses the [args] into [MergeArguments] and starts the jmh-benchmark.
          */
         @JvmStatic
-        fun main(args: Array<String>) = mainBody {
+        fun main(args: Array<String>): Unit = mainBody {
             ArgParser(args).parseInto(::MergeArguments).run {
 
                 val opt = OptionsBuilder()
@@ -145,7 +145,7 @@ open class BenchMerge {
 
     @Benchmark
     fun benchSequential(): Array<Int> {
-        mergeSeq(a, b, out)
+        mergeSeq(a,0, n, b, 0, m, out, 0)
         return out
     }
 
