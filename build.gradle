@@ -16,6 +16,7 @@ repositories {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: property("kotlin.coroutines.version")
     compile "com.xenomachina:kotlin-argparser:${property('argparser.version')}"
     compile group: "org.openjdk.jmh", name: "jmh-core", version: property('jmh.version')
     kapt group: "org.openjdk.jmh", name: "jmh-generator-annprocess", version: property('jmh.version')

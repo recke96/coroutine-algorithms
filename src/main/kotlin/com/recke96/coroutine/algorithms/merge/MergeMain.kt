@@ -3,9 +3,12 @@ package com.recke96.coroutine.algorithms.merge
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import com.xenomachina.argparser.mainBody
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.asCoroutineDispatcher
 import org.openjdk.jmh.annotations.*
 import org.openjdk.jmh.runner.Runner
 import org.openjdk.jmh.runner.options.OptionsBuilder
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -105,18 +108,58 @@ open class BenchMerge {
     @Param("4")
     private var p: Int = 4
 
-    private lateinit var a: List<Int>
-    private lateinit var b: List<Int>
+    private lateinit var a: Array<Int>
+    private lateinit var b: Array<Int>
+    private lateinit var out: Array<Int>
+
+    /**
+     * Used for algorithms that don't specify the number of threads (or assume arbitrary many)
+     */
+    private lateinit var cachedDispatcher: ExecutorCoroutineDispatcher
+    /**
+     * Used for algorithms that require the number of threads as input (has [p] many threads)
+     */
+    private lateinit var fixedDispatcher: ExecutorCoroutineDispatcher
+    /**
+     * Used for baseline of parallel algorithms run on a single thread
+     */
+    private lateinit var singleDispatcher: ExecutorCoroutineDispatcher
 
     @Setup
     fun setup() {
-        a = (1..n).map { Random.nextInt() }.sorted()
-        b = (1..m).map { Random.nextInt() }.sorted()
+        a = (1..n).map { Random.nextInt() }.sorted().toTypedArray()
+        b = (1..m).map { Random.nextInt() }.sorted().toTypedArray()
+        out = Array(a.size + b.size) { 0 }
+
+        cachedDispatcher = Executors.newCachedThreadPool().asCoroutineDispatcher()
+        fixedDispatcher = Executors.newFixedThreadPool(p).asCoroutineDispatcher()
+        singleDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    }
+
+    @TearDown
+    fun teardown(){
+        cachedDispatcher.close()
+        fixedDispatcher.close()
+        singleDispatcher.close()
     }
 
     @Benchmark
-    fun benchSequentialIterative(): List<Int> {
-        return mergeSeq(a, b)
+    fun benchSequential(): Array<Int> {
+        mergeSeq(a, b, out)
+        return out
+    }
+
+    @Benchmark
+    fun benchNaiveParallelBaseline(): Array<Int> {
+        mergeParNaive(a, b, out, singleDispatcher)
+        return out
+    }
+
+    @Benchmark
+    fun benchNaiveParallel(): Array<Int> {
+        val out = Array(a.size + b.size){ 0 }
+        mergeParNaive(a, b, out, cachedDispatcher)
+        return out
     }
 
 }
